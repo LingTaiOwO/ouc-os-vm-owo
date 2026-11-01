@@ -9,14 +9,13 @@ main(void)
   int local_var = 456;
 
   printf("\n===OUC===c1: address analysis ===\n");
-  printf("<vmobserve.c> fix address analysis\n");
+  printf("stack address : 0x%lx\n", (uint64)&local_var);
   // q(≧▽≦q) by Ling Tai
   unsigned long int stack_address = (unsigned long int)(void *)&local_var;
-  printf("VPN[0] : %lu\n", (stack_address >> 12) & 0x1FF);
-  printf("VPN[1] : %lu\n", (stack_address >> 21) & 0x1FF);
   printf("VPN[2] : %lu\n", (stack_address >> 30) & 0x1FF);
-  printf("offset : %lu\n", stack_address & 0xFFF);
-
+  printf("VPN[1] : %lu\n", (stack_address >> 21) & 0x1FF);
+  printf("VPN[0] : %lu\n", (stack_address >> 12) & 0x1FF);
+  printf("offset : 0x%lx\n", stack_address & 0xFFF);
   printf("\n===OUC===c1: address analysis Done ===\n");
 
   // calling vmprint() to print the current process's page table

@@ -476,8 +476,31 @@ vmprint_walk(pagetable_t pagetable,int level)
     pte_t pte = pagetable[i];
     
     // Skip invalid page table entries.
-    if((pte & PTE_V) == 0)
+    if((pte & PTE_V) == 0) {
       continue;
+    }
+    for (int j = 0; j < level + 1; j++) {
+      printf(" ..");
+    }
+    if (level == 2) {
+      // 第三层
+      // 判断是不是有效物理页
+      if (PTE_R || PTE_W || PTE_X) {
+        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 12) & 0x1FF, pte, PTE2PA(pte));
+      } else {
+        continue;
+      }
+    } else {
+      if (level == 1) {
+        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 21) & 0x1FF, pte, PTE2PA(pte));
+      } else if (level == 0) {
+        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 30) & 0x1FF, pte, PTE2PA(pte));
+      }
+    }
+    if (level < 2) {
+      // 未到达第三层则继续递归
+      vmprint_walk((pagetable_t)PTE2PA(pte), level + 1);
+    }
     // TODO:
     // Print indentation according to the current level.
 
@@ -498,6 +521,6 @@ void
 vmprint(pagetable_t pagetable)
 {
   printf("===OUC===c1: Print Page table ===\n");
-  printf("\nTODO: <vm.c> Printing the Page table %p\n", pagetable);
+  printf("Printing the Page table %p\n", pagetable);
   vmprint_walk(pagetable, 0);
 }

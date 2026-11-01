@@ -9,9 +9,14 @@ main(void)
   int local_var = 456;
 
   printf("\n===OUC===c1: address analysis ===\n");
-  printf("TODO: <vmobserve.c> fix address analysis\n");
-  // TODO: c1-1: address analysis:VA\VPN[2]\VPN[1]\VPN[0]\offset
+  printf("<vmobserve.c> fix address analysis\n");
+  // q(≧▽≦q) by Ling Tai
   printf("stack address : 0x%lx\n", (uint64)&local_var);
+  unsigned long int stack_address = (unsigned long int)(void *)&local_var;
+  printf("VPN[2] : %lu\n", (stack_address >> 12) & 0x1FF);
+  printf("VPN[1] : %lu\n", (stack_address >> 21) & 0x1FF);
+  printf("VPN[0] : %lu\n", (stack_address >> 30) & 0x1FF);
+  printf("offset : %lu\n", stack_address & 0xFFF);
 
   printf("\n===OUC===c1: address analysis Done ===\n");
 

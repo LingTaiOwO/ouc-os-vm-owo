@@ -480,24 +480,27 @@ vmprint_walk(pagetable_t pagetable,int level)
       continue;
     }
     for (int j = 0; j < level + 1; j++) {
-      printf(" ..");
+      printf("..");
+      if (j == 0 || j == 1) {
+        printf(" ");
+      }
     }
     if (level == 2) {
       // 第三层
       // 判断是不是有效物理页
-      if (PTE_R || PTE_W || PTE_X) {
-        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 12) & 0x1FF, pte, PTE2PA(pte));
+      if (pte & (PTE_R | PTE_W | PTE_X)) {
+        printf("%d: Pte 0x%lx PA 0x%lx\n", i, pte, PTE2PA(pte));
       } else {
         continue;
       }
     } else {
       if (level == 1) {
-        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 21) & 0x1FF, pte, PTE2PA(pte));
+        printf("%d: Pte 0x%lx PA 0x%lx\n", i, pte, PTE2PA(pte));
       } else if (level == 0) {
-        printf("%lu: Pte 0x%lx PA 0x%lx\n", (PTE2PA(pte) >> 30) & 0x1FF, pte, PTE2PA(pte));
+        printf("%d: Pte 0x%lx PA 0x%lx\n", i, pte, PTE2PA(pte));
       }
     }
-    if (level < 2) {
+    if (!(pte & (PTE_R | PTE_W | PTE_X))) {
       // 未到达第三层则继续递归
       vmprint_walk((pagetable_t)PTE2PA(pte), level + 1);
     }

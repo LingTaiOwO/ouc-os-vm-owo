@@ -480,10 +480,10 @@ vmprint_walk(pagetable_t pagetable,int level)
       continue;
     }
     for (int j = 0; j < level + 1; j++) {
-      printf("..");
-      if (j == 0 || j == 1) {
+      if (j == 2 || j == 1) {
         printf(" ");
       }
+      printf("..");
     }
     if (level == 2) {
       // 第三层
@@ -504,19 +504,6 @@ vmprint_walk(pagetable_t pagetable,int level)
       // 未到达第三层则继续递归
       vmprint_walk((pagetable_t)PTE2PA(pte), level + 1);
     }
-    // TODO:
-    // Print indentation according to the current level.
-
-    // TODO:
-    // Print the PTE index, PTE value and physical address.
-
-    // TODO:
-    // Determine whether this PTE points to a lower-level
-    // page table or represents a leaf mapping.
-
-    // TODO:
-    // If this PTE points to a lower-level page table,
-    // recursively print that page table.
   }
 }
 

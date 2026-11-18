@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "usyscall.h"
 
 struct cpu cpus[NCPU];
 
@@ -138,7 +139,7 @@ found:
     release(&p->lock);
     return 0;
   } else {
-    printf("USYSCALL VA : %p\n", p -> usyscall);
+    printf("USYSCALL VA : %p\n", (void *)USYSCALL);
     p -> usyscall -> pid = p -> pid;
   }
 
@@ -235,7 +236,7 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
-  uvmunmap(pagetable, TRAPFRAME-PGSIZE, 1, 0);
+  uvmunmap(pagetable, USYSCALL, 1, 0);
   uvmfree(pagetable, sz);
 }
 

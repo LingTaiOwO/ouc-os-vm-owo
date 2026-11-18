@@ -104,8 +104,6 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  struct usyscall {
-    int pid;
-  } *usyscall;
+  struct usyscall *usyscall;
   // it can save pid in kernel space, and then copy it to user space when ugetpid() is called.
 };

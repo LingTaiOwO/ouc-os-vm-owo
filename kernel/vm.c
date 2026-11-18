@@ -137,6 +137,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
   return pa;
 }
 
+// 创建页表项指向位于pa的页框，perm表明是否可读写
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa.
 // va and size MUST be page-aligned.

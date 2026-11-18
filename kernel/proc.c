@@ -101,7 +101,7 @@ allocpid()
 
   return pid;
 }
-
+// 从进程表里找一个空闲的进程来用，找到就加锁，没找到返回0
 // Look in the process table for an UNUSED proc.
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
@@ -132,7 +132,15 @@ found:
     return 0;
   }
 
-  // TODO: allocate a user syscall page
+  p -> usyscall = (struct usyscall *)kalloc();
+  if (p -> usyscall == 0) {
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  } else {
+    printf("USYSCALL VA : %p\n", p -> usyscall);
+    p -> usyscall -> pid = p -> pid;
+  }
 
 
   // An empty user page table.
@@ -162,6 +170,9 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+  if(p->usyscall)
+    kfree((void*)p->usyscall);
+  p->usyscall = 0;
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -206,7 +217,13 @@ proc_pagetable(struct proc *p)
     return 0;
   }
 
-  // TODO: map the user syscall page
+  if(mappages(pagetable, USYSCALL, PGSIZE,
+              (uint64)(p->usyscall), PTE_R | PTE_U) < 0){
+    uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+    uvmunmap(pagetable, TRAPFRAME, 1, 0);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
 
   return pagetable;
 }
@@ -216,9 +233,9 @@ proc_pagetable(struct proc *p)
 void
 proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
-  //TODO: unmap the user syscall page
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+  uvmunmap(pagetable, TRAPFRAME-PGSIZE, 1, 0);
   uvmfree(pagetable, sz);
 }
 

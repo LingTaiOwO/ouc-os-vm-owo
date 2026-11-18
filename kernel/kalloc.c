@@ -61,7 +61,7 @@ kfree(void *pa)
   kmem.freelist = r;
   release(&kmem.lock);
 }
-
+// 分配一个空闲物理页面
 // Allocate one 4096-byte page of physical memory.
 // Returns a pointer that the kernel can use.
 // Returns 0 if the memory cannot be allocated.

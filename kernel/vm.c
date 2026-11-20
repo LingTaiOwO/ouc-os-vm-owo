@@ -453,7 +453,37 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 uint64
 vmfault(pagetable_t pagetable, uint64 va, int read)
 {
-  return 0;
+  struct proc *p = myproc();
+  char *mem;
+
+  // The faulting address must be inside the process's address space.
+  // Anything above p->sz was never handed out by sbrk(), so it is a
+  // genuine illegal access, not a lazily-allocated page.
+  if(va >= MAXVA || va >= p->sz)
+    return 0;
+
+  va = PGROUNDDOWN(va);
+
+  // Someone (another hart, or a repeated fault) may have mapped it
+  // already; in that case there is nothing to allocate.
+  if(ismapped(pagetable, va))
+    return 0;
+
+  if((mem = kalloc()) == 0)
+    return 0;
+
+  memset(mem, 0, PGSIZE);
+
+  // Map it writable regardless of read: granting only PTE_R here would
+  // make the very next store fault again, and the lab has no
+  // permission-upgrade path.
+  (void)read;
+  if(mappages(pagetable, va, PGSIZE, (uint64)mem, PTE_R | PTE_W | PTE_U) != 0){
+    kfree(mem);
+    return 0;
+  }
+
+  return (uint64)mem;   // non-zero: success (see the comment above)
 }
 
 int

@@ -40,10 +40,28 @@ uint64
 sys_sbrk(void)
 {
   uint64 addr;
-  int n;
+  int n, which;
 
   argint(0, &n);
+  argint(1, &which);
   addr = myproc()->sz;
+
+  if(which == SBRK_LAZY){
+    if(n < 0){
+      // Shrinking must really unmap: uvmunmap() skips pages that were
+      // never touched, so this is safe even with unmapped holes.
+      if(growproc(n) < 0)
+        return -1;
+    } else {
+      // Grow the virtual size only. No physical pages, no page-table
+      // entries: the first touch will page fault and vmfault() fills
+      // in exactly that one page.
+      if(addr + n < addr || addr + n > MAXVA)
+        return -1;
+      myproc()->sz = addr + n;
+    }
+    return addr;
+  }
 
   if(growproc(n) < 0)
     return -1;

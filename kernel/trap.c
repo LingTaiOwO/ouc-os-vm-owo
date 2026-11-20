@@ -66,6 +66,16 @@ usertrap(void)
     intr_on();
 
     syscall();
+  } else if(r_scause() == 13 || r_scause() == 15){
+    // page fault: 13 = load, 15 = store/AMO.
+    // Lazy allocation: the address may belong to p->sz but have no
+    // physical page yet. vmfault() allocates and maps it; 0 means the
+    // fault was not legitimate, so fall through to killing the process.
+    if(vmfault(p->pagetable, r_stval(), r_scause() == 13) == 0){
+      printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
+      printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
+      setkilled(p);
+    }
   } else if((which_dev = devintr()) != 0){
     // ok
   } else {

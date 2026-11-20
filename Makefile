@@ -145,6 +145,7 @@ UPROGS=\
 	$U/_vmobserve\
 	$U/_usyscalltest\
 	$U/_uvmlookup\
+	$U/_vmfaulttest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

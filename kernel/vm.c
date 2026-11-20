@@ -515,3 +515,22 @@ vmprint(pagetable_t pagetable)
   printf("Printing the Page table %p\n", pagetable);
   vmprint_walk(pagetable, 0);
 }
+
+// Look up the PTE for user virtual address va in pagetable.
+// Returns the PTE if it is valid, 0 otherwise (an unmapped VA
+// can never produce PTE == 0, because a valid PTE always has PTE_V set).
+pte_t
+vmlookup(pagetable_t pagetable, uint64 va)
+{
+  pte_t *pte;
+
+  if(va >= MAXVA)
+    return 0;
+
+  // walk() with alloc=0: never create page-table pages, only look them up.
+  pte = walk(pagetable, va, 0);
+  if(pte == 0 || (*pte & PTE_V) == 0)
+    return 0;
+
+  return *pte;
+}

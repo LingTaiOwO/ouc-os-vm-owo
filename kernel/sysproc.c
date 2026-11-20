@@ -109,10 +109,27 @@ sys_vmprint(void)
   return 0;
 }
 
-// TODO: print pte\pa pages\offset\PA for the given virtual address.
+// Print PTE / physical page / offset / physical address for a user VA.
 uint64
 sys_vmlookup(void)
 {
-    //struct proc *p = myproc(); 
+  uint64 va;
+  pte_t pte;
+  struct proc *p = myproc();
+
+  argaddr(0, &va);
+
+  printf("VA : 0x%lx\n", va);
+
+  pte = vmlookup(p->pagetable, va);
+  if(pte == 0){
+    printf("VA 0x%lx: not mapped\n", va);
     return 0;
+  }
+
+  printf("PTE  : 0x%lx\n", pte);
+  printf("PA page : 0x%lx\n", PTE2PA(pte));
+  printf("offset : 0x%lx\n", va & 0xFFF);
+  printf("PA : 0x%lx\n", PTE2PA(pte) + (va & 0xFFF));
+  return 0;
 }
